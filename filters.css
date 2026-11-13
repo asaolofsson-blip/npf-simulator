@@ -1,0 +1,359 @@
+/**
+ * NPF-Simulator: filters.css
+ * GPU-accelererade visuella effekter och CSS-regler för att minimera CPU-belastning på Chromebooks.
+ */
+
+/* ==========================================================================
+   1. DYSLEXI & TEXTTRÄNGSEL (CROWDING)
+   ========================================================================== */
+
+/* Trängsel: Minskar radavstånd och bokstavsavstånd för att simulera visuell crowding */
+html.npf-crowding-active p,
+html.npf-crowding-active span,
+html.npf-crowding-active div:not(.npf-ignore):not([class*="material-icons"]) {
+  letter-spacing: -0.065em !important;
+  line-height: 0.98 !important;
+  word-spacing: -0.08em !important;
+}
+
+/* Svårläst typsnitt & sänkt kontrast */
+html.npf-contrast-active body,
+html.npf-contrast-active p,
+html.npf-contrast-active span,
+html.npf-contrast-active h1,
+html.npf-contrast-active h2,
+html.npf-contrast-active h3 {
+  font-family: "Times New Roman", Times, "Baskerville", serif !important;
+  color: #55595c !important; /* Dämpar skarp svart text */
+}
+
+/* ==========================================================================
+   2. GOOGLE DOKUMENT CANVAS FALLBACK (div.kix-appview)
+   Eftersom Google Docs ritar text på en Canvas (kix-canvas-tile-content)
+   tillämpar vi ett optiskt filter för att simulera avkodnings- och fokussvårigheter.
+   ========================================================================== */
+
+.npf-docs-optical-filter {
+  filter: url(#npf-docs-distortion) contrast(115%) blur(0.5px) !important;
+  transition: filter 0.3s ease;
+  will-change: filter, transform;
+}
+
+/* Subtil vågrörelse för Google Docs canvas vid dyslexi-simulering */
+@keyframes npf-canvas-subtle-drift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0.5px, -0.5px, 0); }
+  100% { transform: translate3d(-0.5px, 0.5px, 0); }
+}
+
+.kix-appview.npf-docs-optical-filter canvas {
+  animation: npf-canvas-subtle-drift 3s infinite alternate ease-in-out;
+}
+
+/* ==========================================================================
+   3. ADHD & FOKUSLAMPA (SPOTLIGHT / TUNNELSEENDE)
+   Använder CSS mask-image och backdrop-filter med GPU-acceleration.
+   ========================================================================== */
+
+#npf-spotlight-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 2147483640 !important;
+  will-change: mask-image, -webkit-mask-image;
+  
+  /* Bakgrundsoskärpa */
+  backdrop-filter: blur(var(--npf-spotlight-blur, 6px)) !important;
+  -webkit-backdrop-filter: blur(var(--npf-spotlight-blur, 6px)) !important;
+
+  /* Hål runt muspekaren via radial-gradient mask */
+  mask-image: radial-gradient(
+    circle var(--npf-spotlight-radius, 140px) at var(--npf-spotlight-x, 50vw) var(--npf-spotlight-y, 50vh),
+    transparent 0%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.7) 90%,
+    black 100%
+  ) !important;
+  -webkit-mask-image: radial-gradient(
+    circle var(--npf-spotlight-radius, 140px) at var(--npf-spotlight-x, 50vw) var(--npf-spotlight-y, 50vh),
+    transparent 0%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.7) 90%,
+    black 100%
+  ) !important;
+}
+
+/* ==========================================================================
+   4. ADHD PERIFERA DISTRAKTIONER (RÖRELSE I UTKANTERNA)
+   Helt CSS/GPU-drivna utan att belasta JS-tråden.
+   ========================================================================== */
+
+#npf-distractions-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  z-index: 2147483630 !important;
+}
+
+.npf-distraction-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(234, 67, 53, 0.55);
+  box-shadow: 0 0 10px rgba(234, 67, 53, 0.4);
+  will-change: transform, opacity;
+  animation: npf-peripheral-flutter 5s infinite alternate ease-in-out;
+}
+
+.npf-distraction-bar {
+  position: absolute;
+  width: 50px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(66, 133, 244, 0.5);
+  will-change: transform, opacity;
+  animation: npf-peripheral-glide 7s infinite alternate ease-in-out;
+}
+
+@keyframes npf-peripheral-flutter {
+  0% { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0.2; }
+  50% { transform: translate3d(25px, -40px, 0) scale(1.3); opacity: 0.75; }
+  100% { transform: translate3d(-15px, 20px, 0) scale(0.9); opacity: 0.3; }
+}
+
+@keyframes npf-peripheral-glide {
+  0% { transform: translate3d(0, 0, 0); opacity: 0.15; }
+  50% { transform: translate3d(-30px, 60px, 0) rotate(15deg); opacity: 0.6; }
+  100% { transform: translate3d(15px, -30px, 0) rotate(-10deg); opacity: 0.2; }
+}
+
+/* ==========================================================================
+   5. ARBETSMINNESTÖRNING: FALSKA NOTISER (SIMULERADE PUSH-TOASTS)
+   Klassrumsliknande toast som avbryter lärarens arbetsflöde.
+   ========================================================================== */
+
+.npf-notification-toast {
+  position: fixed !important;
+  top: 24px !important;
+  right: 24px !important;
+  width: 320px !important;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  border-left: 4px solid #1a73e8 !important;
+  padding: 12px 14px !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  font-family: Roboto, -apple-system, sans-serif !important;
+  animation: npf-toast-slide-in 0.35s cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+@keyframes npf-toast-slide-in {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.npf-toast-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 4px !important;
+}
+
+.npf-toast-app {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #1a73e8 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.npf-toast-close {
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  color: #5f6368 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  padding: 2px !important;
+}
+
+.npf-toast-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #202124 !important;
+  margin-bottom: 2px !important;
+}
+
+.npf-toast-body {
+  font-size: 12px !important;
+  color: #5f6368 !important;
+  line-height: 1.3 !important;
+}
+
+/* ==========================================================================
+   6. SENSORISK ÖVERBELASTNING (AST / LJUS- & MÄTTNADSFILTER)
+   Helt CSS-baserat med GPU-acceleration.
+   ========================================================================== */
+
+html.npf-sensory-overload {
+  filter: brightness(var(--npf-sensory-brightness, 1.25))
+          contrast(var(--npf-sensory-contrast, 1.35))
+          saturate(var(--npf-sensory-saturate, 1.8)) !important;
+  transition: filter 0.25s ease-out;
+}
+
+/* Subtilt lysrörsflimmer vid sensorisk stress */
+@keyframes npf-flicker-anim {
+  0% { opacity: 1; }
+  49% { opacity: 1; }
+  50% { opacity: 0.94; }
+  52% { opacity: 1; }
+  78% { opacity: 1; }
+  80% { opacity: 0.96; }
+  82% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+html.npf-sensory-flicker body {
+  animation: npf-flicker-anim 4s infinite linear;
+}
+
+/* ==========================================================================
+   7. ADHD OVÄNTADE INFALL ("KROKODILEN")
+   Överraskande, perifera figurer som spatserar över skärmen och stjäl uppmärksamhet.
+   Använder transform: translate3d så att !important inte låser fast positionen.
+   ========================================================================== */
+
+.npf-intruder-container {
+  position: fixed !important;
+  left: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  will-change: transform !important;
+}
+
+/* Krokodil som vandrar längst ned */
+.npf-intruder-crocodile {
+  bottom: 24px !important;
+  animation: npf-walk-across 12s linear forwards !important;
+}
+
+/* Katt som smyger fram */
+.npf-intruder-cat {
+  bottom: 24px !important;
+  animation: npf-walk-across 11s linear forwards !important;
+}
+
+/* Flamingo som kliver fram */
+.npf-intruder-flamingo {
+  bottom: 24px !important;
+  animation: npf-walk-across 14s linear forwards !important;
+}
+
+/* UFO som glider i toppen */
+.npf-intruder-ufo {
+  top: 36px !important;
+  animation: npf-ufo-across 10s ease-in-out forwards !important;
+}
+
+.npf-intruder-figure {
+  font-size: 44px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) !important;
+}
+
+.npf-intruder-crocodile .npf-intruder-figure {
+  animation: npf-waddle 0.5s infinite alternate ease-in-out !important;
+  transform-origin: bottom center !important;
+}
+
+.npf-intruder-cat .npf-intruder-figure {
+  animation: npf-cat-trot 0.4s infinite alternate ease-in-out !important;
+  transform-origin: bottom center !important;
+}
+
+.npf-intruder-ufo .npf-intruder-figure {
+  animation: npf-ufo-wobble 1s infinite alternate ease-in-out !important;
+}
+
+/* Tankebubbla / text från figuren */
+.npf-intruder-bubble {
+  background: #ffffff !important;
+  color: #202124 !important;
+  border: 1px solid #dadce0 !important;
+  border-radius: 16px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-family: Roboto, -apple-system, sans-serif !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2) !important;
+  white-space: nowrap !important;
+  opacity: 0.98 !important;
+  animation: npf-bubble-pop 0.35s ease-out !important;
+}
+
+/* GPU-accelererade rörelser över hela skärmen */
+@keyframes npf-walk-across {
+  0% { transform: translate3d(-380px, 0, 0); }
+  100% { transform: translate3d(calc(100vw + 60px), 0, 0); }
+}
+
+@keyframes npf-ufo-across {
+  0% { transform: translate3d(-380px, 0, 0); }
+  25% { transform: translate3d(25vw, 25px, 0); }
+  50% { transform: translate3d(50vw, -15px, 0); }
+  75% { transform: translate3d(75vw, 20px, 0); }
+  100% { transform: translate3d(calc(100vw + 60px), 0, 0); }
+}
+
+@keyframes npf-waddle {
+  0% { transform: translateY(0) rotate(-4deg); }
+  100% { transform: translateY(-5px) rotate(5deg); }
+}
+
+@keyframes npf-cat-trot {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-4px) rotate(3deg); }
+}
+
+@keyframes npf-ufo-wobble {
+  0% { transform: rotate(-6deg); }
+  100% { transform: rotate(6deg); }
+}
+
+@keyframes npf-bubble-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 0.98; }
+}
+
+/* ==========================================================================
+   8. MOTMEDEL: STOKASTISK RESONANS (VISUELLT BRUS)
+   Canvas-lager med pointer-events: none och optimerad blend mode.
+   ========================================================================== */
+
+#npf-stochastic-canvas {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 2147483639 !important;
+  mix-blend-mode: overlay !important;
+  opacity: var(--npf-stochastic-opacity, 0.08) !important;
+  will-change: opacity;
+}

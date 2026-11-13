@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPF-Simulator för Lärare</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-main">
+      <div class="logo-badge">NPF</div>
+      <div>
+        <h1>NPF-Simulator</h1>
+        <p class="subtitle">Tillgänglighetstest för lärare</p>
+      </div>
+    </div>
+    <div id="env-badge" class="env-badge env-generic">
+      <span class="env-dot"></span>
+      <span id="env-text">Läser av flik...</span>
+    </div>
+  </header>
+
+  <!-- Docs Canvas Banner (visas enbart när Google Docs detekteras) -->
+  <div id="docs-warning" class="info-banner hidden">
+    <div class="banner-icon">ℹ️</div>
+    <div class="banner-text">
+      <strong>Google Dokument upptäckt:</strong><br>
+      Dokumentets text ritas på en Canvas (<code>kix-appview</code>). Simulatorn kopplar automatiskt om till optiska filter och vågdistorsion.
+    </div>
+  </div>
+
+  <main class="panel-content">
+    <!-- Snabbprofiler -->
+    <section class="section-card quick-profiles">
+      <h2>Snabbprofiler</h2>
+      <div class="profile-buttons">
+        <button id="profile-dyslexia" class="btn-profile">📖 Dyslexi</button>
+        <button id="profile-adhd" class="btn-profile">⚡ ADHD</button>
+        <button id="profile-sensory" class="btn-profile">💡 Sensorisk</button>
+      </div>
+    </section>
+
+    <!-- Filter 1: Dyslexi -->
+    <section class="filter-card" id="card-dyslexia">
+      <div class="filter-header">
+        <div class="filter-title">
+          <span class="icon">🔤</span>
+          <div>
+            <h3>Dyslexi & Avkodning</h3>
+            <span class="desc">Bokstavskastning och textträngsel</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="dyslexia-master">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="filter-body" id="dyslexia-controls">
+        <div class="control-group">
+          <div class="control-label">
+            <span>Bokstavskastning (Intensitet)</span>
+            <span id="scramble-val" class="val-badge">5</span>
+          </div>
+          <input type="range" id="dyslexia-scramble" min="1" max="10" value="5">
+          <span class="control-hint">Kastar om inre bokstäver i ord med TreeWalker.</span>
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="dyslexia-crowding">
+            <span>Visuell trängsel (Crowding)</span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="dyslexia-contrast">
+            <span>Svårlästa seriffer & sänkt kontrast</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter 2: ADHD -->
+    <section class="filter-card" id="card-adhd">
+      <div class="filter-header">
+        <div class="filter-title">
+          <span class="icon">🎯</span>
+          <div>
+            <h3>ADHD & Koncentration</h3>
+            <span class="desc">Fokus, arbetsminne & distraktion</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="adhd-master">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="filter-body" id="adhd-controls">
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="adhd-spotlight">
+            <span>Fokuslampa / Tunnelseende (Mus-spotlight)</span>
+          </label>
+        </div>
+
+        <div class="control-group" id="spotlight-slider-group">
+          <div class="control-label">
+            <span>Bakgrundsoskärpa (Blur)</span>
+            <span id="blur-val" class="val-badge">6px</span>
+          </div>
+          <input type="range" id="adhd-blur" min="2" max="15" value="6">
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="adhd-distractions">
+            <span>Perifera distraktioner (Rörelser i sidled)</span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="adhd-notifications">
+            <span>Simulerade notiser (Arbetsminnesstörning)</span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="adhd-crocodile" checked>
+            <span>Oväntade infall (t.ex. en krokodil som spatserar förbi 🐊)</span>
+          </label>
+        </div>
+
+        <div class="test-action-row">
+          <button id="btn-trigger-crocodile" class="btn-secondary-action" type="button">
+            <span>🐊</span> Skicka en krokodil nu!
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter 3: Sensorisk överbelastning -->
+    <section class="filter-card" id="card-sensory">
+      <div class="filter-header">
+        <div class="filter-title">
+          <span class="icon">✨</span>
+          <div>
+            <h3>Sensorisk överbelastning</h3>
+            <span class="desc">Autismspektrum / Ljuskänslighet</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sensory-master">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="filter-body" id="sensory-controls">
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="sensory-overexposure">
+            <span>Överexponerade färger & mättnad</span>
+          </label>
+        </div>
+
+        <div class="control-group" id="sensory-slider-group">
+          <div class="control-label">
+            <span>Ljus- & Kontraststyrka</span>
+            <span id="sensory-val" class="val-badge">130%</span>
+          </div>
+          <input type="range" id="sensory-intensity" min="110" max="180" step="5" value="130">
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="sensory-flicker">
+            <span>Subtilt lysrörsflimmer</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter 4 / Motmedel: Stokastisk resonans -->
+    <section class="filter-card card-countermeasure" id="card-stochastic">
+      <div class="filter-header">
+        <div class="filter-title">
+          <span class="icon">🔬</span>
+          <div>
+            <h3>Motmedel: Stokastiskt brus</h3>
+            <span class="desc">Stokastisk resonans för läsfokus</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="stochastic-master">
+          <span class="slider slider-green"></span>
+        </label>
+      </div>
+
+      <div class="filter-body" id="stochastic-controls">
+        <div class="control-group">
+          <div class="control-label">
+            <span>Brusintensitet (Opacitet)</span>
+            <span id="stochastic-opacity-val" class="val-badge badge-green">8%</span>
+          </div>
+          <input type="range" id="stochastic-opacity" min="1" max="30" value="8">
+          <span class="control-hint">Subtilt pixelbrus överlagrat texten (0–30%).</span>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Kornstorlek (Pixelstorlek)</span>
+            <span id="stochastic-grain-val" class="val-badge badge-green">2px</span>
+          </div>
+          <input type="range" id="stochastic-grain" min="1" max="4" value="2">
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="stochastic-dynamic" checked>
+            <span>Dynamiskt brus (Rörlig TV-statik)</span>
+          </label>
+        </div>
+
+        <div class="control-group" id="stochastic-fps-group">
+          <div class="control-label">
+            <span>Bildfrekvens (FPS)</span>
+            <span id="stochastic-fps-val" class="val-badge badge-green">20 fps</span>
+          </div>
+          <input type="range" id="stochastic-fps" min="5" max="60" step="5" value="20">
+          <span class="control-hint">Avlastad via förrenderade brusmönster för låg CPU.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pedagogiskt råd -->
+    <div class="pedagogical-box">
+      <strong>💡 Pedagogisk reflektion</strong>
+      <p id="pedagogical-tip">Aktivera ett filter och försök att läsa instruktionen i din Classroom-uppgift. Hur lång tid tar det att hitta det viktigaste datumet?</p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="btn-reset" class="btn-reset">
+      <span class="reset-icon">↺</span> Återställ alla filter
+    </button>
+  </footer>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
